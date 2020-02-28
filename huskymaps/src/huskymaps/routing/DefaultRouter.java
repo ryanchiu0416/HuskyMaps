@@ -79,19 +79,15 @@ public class DefaultRouter extends Router {
         }
 
         List<NavigationDirection> results = new ArrayList<>();
-        NavigationDirection beginNav = new NavigationDirection();
         if (route.size() >= 2) {
             WeightedEdge<Node> edge = getEdge(route.get(0), route.get(1));
-            beginNav.direction = NavigationDirection.START;
-            beginNav.way = edge.name();
-            beginNav.distance = edge.weight();
             int currDirection = NavigationDirection.STRAIGHT;
-            String currWayName = beginNav.way;
-            double currDistance = beginNav.distance;
+            String currWayName = edge.name();
+            double currDistance = edge.weight();
 
             for (int i = 0; i < directionAngle.size() - 1; i++) {
                 int dir = NavigationDirection.getDirection(directionAngle.get(i), directionAngle.get(i + 1));
-                edge = getEdge(route.get(i), route.get(i + 1));
+                edge = getEdge(route.get(i + 1), route.get(i + 2));
                 if (currWayName.equals(edge.name()) && (dir == NavigationDirection.SLIGHT_LEFT
                     || dir == NavigationDirection.SLIGHT_RIGHT || dir == NavigationDirection.STRAIGHT)) {
                     currDistance += edge.weight();

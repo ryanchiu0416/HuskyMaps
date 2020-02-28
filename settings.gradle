@@ -1,0 +1,2 @@
+rootProject.name = 'cse373'
+include 'intlist', 'deques', 'autocomplete', 'heap', 'kdtree', 'astar', 'huskymaps', 'seamcarving'

@@ -1,0 +1,5 @@
+
+sourceSets.main.studentJava.files = [
+        'pointsets/NaivePointSet.java',
+        'pointsets/KDTreePointSet.java',
+]

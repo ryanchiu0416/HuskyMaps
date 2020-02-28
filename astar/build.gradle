@@ -1,0 +1,8 @@
+
+sourceSets.main.studentJava.files = ['graphpathfinding/AStarPathFinder.java']
+
+allprojects {
+    dependencies {
+        implementation project(':heap')
+    }
+}

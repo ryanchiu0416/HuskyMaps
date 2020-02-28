@@ -1,0 +1,5 @@
+
+sourceSets.main.studentJava.files = [
+        'arrayutils/BinaryRangeSearcher.java',
+        'autocomplete/DefaultTerm.java',
+]

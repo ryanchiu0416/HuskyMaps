@@ -1,0 +1,219 @@
+
+/* In this assignment, and all future ones, we use Gradle, a build manager.
+ *
+ * The purpose of build managers like Gradle is to standardize and simplify the process of
+ * managing a Java project. This is useful because different IDEs like Eclipse or IntelliJ all
+ * have different standards and conventions on how they expect their projects to be structured
+ * and organized.
+ *
+ * Having to manage settings for n different IDEs can be a pain, so we simplify by telling them
+ * to all use Gradle instead.
+ *
+ * Other examples of build managers include Ant and Maven.
+ *
+ * You don't to know anything about Gradle or build managers to complete this project, but if
+ * you're curious, take a look at guides and documentation on the Gradle website:
+ * https://guides.gradle.org/creating-new-gradle-builds/
+ * https://docs.gradle.org/current/userguide/tutorial_using_tasks.html
+ * https://docs.gradle.org/current/userguide/building_java_projects.html
+ */
+
+// Here, we list some plugins that we use to augment this build script itself.
+plugins {
+    // Use the Java plugin to add support for Java
+    id 'java-library'
+
+    // Use IDEA plugins so we can specify some settings specific to IntelliJ.
+    id 'idea'
+    id "org.jetbrains.gradle.plugin.idea-ext" version "0.7"
+
+    // Add support for running Checkstyle through Gradle and improving Gradle's test output.
+    // You shouldn't need to use Gradle to run Checkstyle or your tests since you can do that
+    // natively in IntelliJ, but we've included these anyway.
+    id 'checkstyle'
+    id 'com.adarshr.test-logger' version '2.0.0'
+
+    // Add a Git library, which we use to automatically add the remote for the skeleton repo.
+    id 'org.ajoberstar.grgit' version '4.0.1'
+}
+
+import org.jetbrains.gradle.ext.ActionDelegationConfig
+
+// This sets the version of Gradle that Gradle will download when we use the wrapper task.
+wrapper {
+    gradleVersion = '6.0.1'
+    distributionType = Wrapper.DistributionType.BIN
+}
+
+// Here, we define a dictionary of versions for dependencies used across multiple subprojects.
+ext.commonDependencies = [
+        junit: [group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.5.2'],
+        junitengine: [group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.5.2'],
+        junitreporting: [group: 'org.junit.platform', name: 'junit-platform-reporting', version: '1.5.2'],
+        assertj: [group: 'org.assertj', name: 'assertj-core', version: '3.14.0'],
+        gson: [group: 'com.google.code.gson', name: 'gson', version: '2.8.6'],
+]
+
+// Specify additional settings to apply to all projects (including subprojects).
+allprojects {
+    // We need to re-apply our plugins for each subproject
+    apply plugin: 'java-library'
+    apply plugin: 'idea'
+    apply plugin: 'checkstyle'
+    apply plugin: 'com.adarshr.test-logger'
+    apply plugin: AssignmentPlugin
+
+    // This project uses a few 3rd-party libraries. Rather than downloading and installing them
+    // manually, which can be highly error-prone, we have Gradle do it for us.
+    // In this section, we specify where we want to search for these 3rd-party packages.
+    repositories {
+        // JCenter is a website containing a large collection of 3rd-party libraries.
+        jcenter()
+    }
+
+    // This section tells Gradle where we're putting our main code and our tests.
+    // We're not using the default project structure for Gradle (and most other Java build tools),
+    // but rather opting for a version that reduces the number of nested folders.
+    sourceSets {
+        main {
+            java.srcDirs = ['src']
+            resources.srcDirs = []
+        }
+        test {
+            java.srcDirs = ['test']
+            resources.srcDirs = []
+        }
+    }
+
+    // Here, we list all the different dependencies that are needed by our project--other
+    // subprojects or external libraries.
+    // Gradle will automatically download these libraries from the repositories listed above.
+    dependencies {
+        // We use some convenience classes from a library provided by Princeton.
+        implementation group: 'edu.princeton.cs', name: 'algs4', version: '1.0.4'
+
+        // Our tests extend the BaseTest class in the root project.
+        testImplementation rootProject
+        // We use JUnit to help us write tests.
+        testImplementation rootProject.commonDependencies.junit
+        testRuntimeOnly rootProject.commonDependencies.junitengine
+        testImplementation rootProject.commonDependencies.assertj
+    }
+
+    // This sets the version of Java we're using.
+    java {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    // Configure the Checkstyle plugin
+    checkstyle {
+        toolVersion = '8.26'
+        ignoreFailures = true
+    }
+
+    // Configure pretty test output plugin
+    testlogger {
+        theme 'standard'
+        showExceptions true
+        showStackTraces false
+        showFullStackTraces false
+        showCauses false
+        showSummary false
+        slowThreshold 60000
+        showStandardStreams false
+        showPassedStandardStreams false
+        showSkippedStandardStreams false
+        showFailedStandardStreams false
+    }
+
+    // These next few sections configure the default tasks added by our plugins.
+    tasks.withType(JavaCompile).configureEach {
+        // Enable compiler warnings, and compile with UTF8 encoding
+        options.compilerArgs << '-Xlint:unchecked' << '-Xlint:deprecation' << '-encoding' << 'utf8'
+    }
+
+    tasks.withType(Checkstyle).configureEach {
+        // Disable Checkstyle report files
+        reports {
+            html.enabled = false
+            xml.enabled = false
+        }
+    }
+
+    tasks.withType(Test).configureEach {
+        group = 'verification'
+        // Use JUnit 5
+        useJUnitPlatform()
+        // Always rerun tests
+        outputs.upToDateWhen { false }
+
+        // Disable JUnit report files
+        reports {
+            html.enabled = false
+            junitXml.enabled = false
+        }
+    }
+}
+
+// Our root project has some extra dependencies
+dependencies {
+    implementation commonDependencies.junit, commonDependencies.assertj
+}
+
+// This adds the task that adds the skeleton remote.
+tasks.register('addSkeletonRemote') {
+    // Only run if skeleton remote doesn't already exist
+    onlyIf {
+        !grgit.remote.list().any { it.name == 'skeleton' }
+    }
+    doLast {
+        grgit.remote.add(name: 'skeleton', url: 'git@gitlab.cs.washington.edu:cse373-20wi-students/skeleton.git')
+    }
+}
+
+// Here, we can configure settings specific to IntelliJ.
+idea.project.settings {
+    // Don't delegate running/compiling/testing to Gradle, since
+    // IntelliJ's JUnit5 support is better than Gradle's
+    delegateActions {
+        delegateBuildRunToGradle = false
+        testRunner = ActionDelegationConfig.TestRunner.PLATFORM
+    }
+
+    taskTriggers {
+        // Configure IntelliJ to add the skeleton remote when importing the Gradle project
+        afterSync tasks.named('addSkeletonRemote')
+    }
+}
+
+// Below are some dummy classes for our Assignment plugin.
+// We use this plugin to tell the autograder which of your files to grade, but since you don't need
+// that functionality, we're simply providing classes that do nothing instead.
+class AssignmentPluginExtension {
+    final Property<String> message
+    final DirectoryProperty studentRoot
+
+    AssignmentPluginExtension(ObjectFactory objects) {
+        message = objects.property(String)
+        studentRoot = objects.directoryProperty()
+    }
+}
+
+class AssignmentSourceSetExtension {
+    final ListProperty<String> files
+
+    AssignmentSourceSetExtension(ObjectFactory objects) {
+        files = objects.listProperty(String)
+    }
+}
+
+class AssignmentPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        def extension = project.extensions.create('assignment', AssignmentPluginExtension, project.objects)
+
+        project.sourceSets.all { SourceSet sourceSet ->
+            def studentJava = sourceSet.extensions.create('studentJava', AssignmentSourceSetExtension, project.objects)
+        }
+    }
+}

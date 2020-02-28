@@ -1,0 +1,4 @@
+
+sourceSets.main.studentJava.files = [
+        'priorityqueues/ArrayHeapMinPQ.java'
+]

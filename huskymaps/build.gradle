@@ -1,0 +1,21 @@
+sourceSets {
+    main {
+        resources.srcDirs = ['resources']
+        studentJava.files = [
+            'huskymaps/rastering/DefaultRasterer.java',
+            'huskymaps/routing/DefaultRouter.java',
+            'huskymaps/searching/DefaultSearcher.java',
+        ]
+    }
+}
+
+allprojects {
+    dependencies {
+        implementation project(':autocomplete')
+        implementation project(':kdtree')
+        implementation project(':astar')
+        implementation rootProject.commonDependencies.gson
+        implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6'
+        implementation group: 'com.sparkjava', name: 'spark-core', version: '2.3'
+    }
+}

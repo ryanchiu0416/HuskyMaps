@@ -1,16 +1,5 @@
-# CSE 373 Homework
+# HuskyMaps
 
-You'll use this Git repository for all homework assignments in this class.
+A GoogleMaps-like web application with Point of Interest search, Navigation, and turn-by-turn Directions
 
-This project is meant to be imported into IntelliJ as a Gradle project.
-
-You are not expected to understand the contents of any Gradle-related files, 
-and may safely ignore them---if you encounter issues with project setup, please
-seek help from the course staff.
-
-See [the homework page on the course website](https://cs.uw.edu/373/homework/)
-for more instructions.
-
-(In theory, it should be possible to complete our projects using the Gradle 
-support in any other IDE or by using Gradle without an IDE, but the course 
-staff may not be able to provide technical support if you do so.)
+View project -> https://huskymaps-ryanchiu.herokuapp.com/map.html#lat=47.65590728062972&lon=-122.32663137054443&depth=5

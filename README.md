@@ -6,4 +6,4 @@ A GoogleMaps-like web application with Point of Interest search, Navigation, and
 - Enabled autocomplete search function with `binary search algorithm`
 - Built k-d tree data structure for point of interest look-up
 
-https://huskymaps-ryanchiu.herokuapp.com/map.html#lat=47.65590728062972&lon=-122.32663137054443&depth=5
+https://huskymaps-ryanchiu.herokuapp.com/map.html
